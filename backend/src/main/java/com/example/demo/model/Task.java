@@ -12,12 +12,14 @@ public class Task {
 
     private String title;
     private String description;
-    private String status; // Will hold values like "TODO", "IN_PROGRESS", "DONE"
+    private String status; 
 
-    // Default constructor required by Java JPA
+    // The magic ingredient for concurrent transaction safety
+    @Version
+    private Long version;
+
     public Task() {}
 
-    // Constructor to quickly build tasks
     public Task(String title, String description, String status) {
         this.title = title;
         this.description = description;
@@ -36,4 +38,7 @@ public class Task {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

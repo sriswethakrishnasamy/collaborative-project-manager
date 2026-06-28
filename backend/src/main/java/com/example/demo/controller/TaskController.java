@@ -26,4 +26,17 @@ public class TaskController {
     public Task createTask(@RequestBody Task task) {
         return taskRepository.save(task);
     }
+    // 3. Update task status safely with concurrency handling
+    @PutMapping("/{id}/status")
+    @org.springframework.transaction.annotation.Transactional
+    public Task updateTaskStatus(@PathVariable Long id, @RequestParam String status) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        
+        task.setStatus(status);
+        
+        // If another thread modified this task since we fetched it, 
+        // this save call will throw an ObjectOptimisticLockingFailureException, preventing data corruption!
+        return taskRepository.save(task);
+    }
 }
