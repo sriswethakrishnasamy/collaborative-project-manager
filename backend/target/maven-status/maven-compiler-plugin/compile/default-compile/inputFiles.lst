@@ -1,0 +1,4 @@
+/workspaces/collaborative-project-manager/backend/src/main/java/com/example/demo/DemoApplication.java
+/workspaces/collaborative-project-manager/backend/src/main/java/com/example/demo/controller/TaskController.java
+/workspaces/collaborative-project-manager/backend/src/main/java/com/example/demo/model/Task.java
+/workspaces/collaborative-project-manager/backend/src/main/java/com/example/demo/repository/TaskRepository.java
