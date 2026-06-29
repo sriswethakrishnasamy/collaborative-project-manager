@@ -12,6 +12,7 @@ function App() {
 
   const fetchTasks = async () => {
     try {
+      // 🔥 FIXED: Changed port from 5173 to 8080 so it reads from the backend database
       const response = await fetch('https://glowing-succotash-5grp4rp9j6jpc4pjw-8080.app.github.dev/api/tasks')
       const data = await response.json()
       setTasks(data)
@@ -43,10 +44,28 @@ function App() {
       if (response.ok) {
         setTitle('')
         setDescription('')
-        fetchTasks() // Instantly refresh the task list on screen
+        fetchTasks() // This will now refresh flawlessly from port 8080!
       }
     } catch (error) {
       console.error('Error creating task:', error)
+    }
+  }
+
+  // 3. Handle changing a task's status safely using our concurrent PUT endpoint
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      const response = await fetch(`https://glowing-succotash-5grp4rp9j6jpc4pjw-8080.app.github.dev/api/tasks/${taskId}/status?status=${newStatus}`, {
+        method: 'PUT'
+      })
+
+      if (response.ok) {
+        fetchTasks() // Refresh list to reflect changes and updated database version tags
+      } else {
+        alert('Transaction conflict or error updating status. Refreshing data.')
+        fetchTasks()
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
     }
   }
 
@@ -83,11 +102,26 @@ function App() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           {tasks.map((task) => (
             <div key={task.id} style={{ padding: '15px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: '#f9f9f9', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-              <h4 style={{ margin: '0 0 8px 0', color: '#1a1a1a' }}>{task.title}</h4>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, color: '#1a1a1a' }}>{task.title}</h4>
+                
+                {/* Status Switcher Dropdown */}
+                <select 
+                  value={task.status} 
+                  onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                  style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                >
+                  <option value="TODO">TODO</option>
+                  <option value="IN_PROGRESS">IN PROGRESS</option>
+                  <option value="DONE">DONE</option>
+                </select>
+              </div>
               <p style={{ margin: '0 0 10px 0', color: '#555', fontSize: '14px' }}>{task.description}</p>
-              <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '4px', backgroundColor: '#e2e8f0', fontWeight: 'bold', color: '#4a5568' }}>
-                {task.status}
-              </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '11px', color: '#999' }}>
+                  DB Version Tracking Key: v{task.version || 0}
+                </span>
+              </div>
             </div>
           ))}
         </div>
